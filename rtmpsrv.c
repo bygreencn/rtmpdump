@@ -97,6 +97,7 @@ void *sslCtx = NULL;
 STREAMING_SERVER *startStreaming(const char *address, int port);
 void stopStreaming(STREAMING_SERVER * server);
 void AVreplace(AVal *src, const AVal *orig, const AVal *repl);
+int SendCheckBWResponse(RTMP *r, int oldMethodType, int onBWDoneInit);
 
 static const AVal av_dquote = AVC("\"");
 static const AVal av_escdquote = AVC("\\\"");
@@ -168,6 +169,10 @@ SAVC(level);
 SAVC(code);
 SAVC(description);
 SAVC(secureToken);
+SAVC(_checkbw);
+SAVC(_onbwdone);
+SAVC(checkBandwidth);
+SAVC(onBWDone);
 
 static int
 SendConnectResult(RTMP *r, double txn)
@@ -328,6 +333,50 @@ SendPlayStop(RTMP *r)
   packet.m_nBodySize = enc - packet.m_body;
   return RTMP_SendPacket(r, &packet, FALSE);
 }
+
+int
+SendCheckBWResponse(RTMP *r, int oldMethodType, int onBWDoneInit)
+{
+  RTMPPacket packet;
+  char pbuf[256], *pend = pbuf + sizeof (pbuf);
+  char *enc;
+
+  packet.m_nChannel = 0x03; /* control channel (invoke) */
+  packet.m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+  packet.m_packetType = RTMP_PACKET_TYPE_INVOKE;
+  packet.m_nTimeStamp = 0;
+  packet.m_nInfoField2 = 0;
+  packet.m_hasAbsTimestamp = 0;
+  packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
+
+  enc = packet.m_body;
+  if (oldMethodType)
+    {
+      enc = AMF_EncodeString(enc, pend, &av__onbwdone);
+      enc = AMF_EncodeNumber(enc, pend, 0);
+      *enc++ = AMF_NULL;
+      enc = AMF_EncodeNumber(enc, pend, 10240);
+      enc = AMF_EncodeNumber(enc, pend, 10240);
+    }
+  else
+    {
+      enc = AMF_EncodeString(enc, pend, &av_onBWDone);
+      enc = AMF_EncodeNumber(enc, pend, 0);
+      *enc++ = AMF_NULL;
+      if (!onBWDoneInit)
+        {
+          enc = AMF_EncodeNumber(enc, pend, 10240);
+          enc = AMF_EncodeNumber(enc, pend, 10240);
+          enc = AMF_EncodeNumber(enc, pend, 0);
+          enc = AMF_EncodeNumber(enc, pend, 0);
+        }
+    }
+
+  packet.m_nBodySize = enc - packet.m_body;
+
+  return RTMP_SendPacket(r, &packet, FALSE);
+}
+
 
 static void
 spawn_dumper(int argc, AVal *av, char *cmd)
@@ -569,6 +618,7 @@ ServeInvoke(STREAMING_SERVER *server, RTMP * r, RTMPPacket *packet, unsigned int
 	  server->arglen += countAMF(&r->Link.extras, &server->argc);
 	}
       SendConnectResult(r, txn);
+      SendCheckBWResponse(r, FALSE, TRUE);
     }
   else if (AVMATCH(&method, &av_createStream))
     {
