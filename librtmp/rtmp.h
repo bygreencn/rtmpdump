@@ -296,6 +296,7 @@ extern "C"
 		     unsigned int *port, AVal *playpath, AVal *app);
 
   void RTMP_ParsePlaypath(AVal *in, AVal *out);
+  AVal StripParams(AVal *src);
   void RTMP_SetBufferMS(RTMP *r, int size);
   void RTMP_UpdateBufferMS(RTMP *r);
 

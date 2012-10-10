@@ -667,6 +667,7 @@ ServeInvoke(STREAMING_SERVER *server, RTMP * r, RTMPPacket *packet, unsigned int
 	  argv[argc].av_val = ptr + 1;
 	  argv[argc++].av_len = 2;
 	  argv[argc].av_val = ptr + 5;
+	  r->Link.tcUrl = StripParams(&r->Link.tcUrl);
 	  ptr += sprintf(ptr," -r \"%s\"", r->Link.tcUrl.av_val);
 	  argv[argc++].av_len = r->Link.tcUrl.av_len;
 

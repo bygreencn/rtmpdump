@@ -292,3 +292,50 @@ void RTMP_ParsePlaypath(AVal *in, AVal *out) {
 	out->av_val = streamname;
 	out->av_len = destptr - streamname;
 }
+
+AVal
+StripParams(AVal *src)
+{
+  AVal str;
+  if (src->av_val)
+    {
+      str.av_val = calloc(src->av_len + 1, sizeof (char));
+      strncpy(str.av_val, src->av_val, src->av_len);
+      str.av_len = src->av_len;
+      char *start = str.av_val;
+      char *end = start + str.av_len;
+      char *ptr = start;
+
+      while (ptr < end)
+        {
+          if (*ptr == '?')
+            {
+              str.av_len = ptr - start;
+              break;
+            }
+          ptr++;
+        }
+      memset(start + str.av_len, 0, 1);
+
+      char *dynamic = strstr(start, "[[DYNAMIC]]");
+      if (dynamic)
+        {
+          dynamic -= 1;
+          memset(dynamic, 0, 1);
+          str.av_len = dynamic - start;
+          end = start + str.av_len;
+        }
+
+      char *import = strstr(start, "[[IMPORT]]");
+      if (import)
+        {
+          str.av_val = import + 11;
+          strcpy(start, "http://");
+          str.av_val = strcat(start, str.av_val);
+          str.av_len = strlen(str.av_val);
+        }
+      return str;
+    }
+  str = *src;
+  return str;
+}
