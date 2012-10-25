@@ -276,21 +276,61 @@ void RTMP_ParsePlaypath(AVal *in, AVal *out) {
 			pplen -= 4;
 			continue;
 		}
-		if (*p == '%') {
-			unsigned int c;
-			sscanf(p+1, "%02x", &c);
-			*destptr++ = c;
-			pplen -= 3;
-			p += 3;
-		} else {
-			*destptr++ = *p++;
-			pplen--;
-		}
+		*destptr++ = *p++;
+		pplen--;
 	}
 	*destptr = '\0';
+	http_unescape(streamname);
 
 	out->av_val = streamname;
-	out->av_len = destptr - streamname;
+	out->av_len = strlen(streamname);
+}
+
+/* inplace http unescape. This is possible .. strlen(unescaped_string)  <= strlen(esacped_string) */
+void
+http_unescape(char *data)
+{
+  char hex[3];
+  char *stp;
+  int src_x = 0;
+  int dst_x = 0;
+
+  int length = (int) strlen(data);
+  hex[2] = 0;
+
+  while (src_x < length)
+    {
+      if (strncmp(data + src_x, "%", 1) == 0 && src_x + 2 < length)
+	{
+	  //
+	  // Since we encountered a '%' we know this is an escaped character
+	  //
+	  hex[0] = data[src_x + 1];
+	  hex[1] = data[src_x + 2];
+	  data[dst_x] = (char) strtol(hex, &stp, 16);
+	  dst_x += 1;
+	  src_x += 3;
+	}
+      else if (src_x != dst_x)
+	{
+	  //
+	  // This doesn't need to be unescaped. If we didn't unescape anything previously
+	  // there is no need to copy the string either
+	  //
+	  data[dst_x] = data[src_x];
+	  src_x += 1;
+	  dst_x += 1;
+	}
+      else
+	{
+	  //
+	  // This doesn't need to be unescaped, however we need to copy the string
+	  //
+	  src_x += 1;
+	  dst_x += 1;
+	}
+    }
+  data[dst_x] = '\0';
 }
 
 AVal

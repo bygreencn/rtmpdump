@@ -969,6 +969,7 @@ main(int argc, char **argv)
 	    }
 	  break;
 	case 'y':
+	  http_unescape(optarg);
 	  STR2AVAL(playpath, optarg);
 	  break;
 	case 'Y':
