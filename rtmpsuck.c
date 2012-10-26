@@ -150,6 +150,7 @@ AVC("NetConnection.Connect.InvalidApp");
 static const AVal av_NetStream_Play_Start = AVC("NetStream.Play.Start");
 static const AVal av_NetStream_Play_Complete = AVC("NetStream.Play.Complete");
 static const AVal av_NetStream_Play_Stop = AVC("NetStream.Play.Stop");
+static const AVal av_NetStream_Authenticate_UsherToken = AVC("NetStream.Authenticate.UsherToken");
 
 static const char *cst[] = { "client", "server" };
 
@@ -303,6 +304,16 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
           return 1;
         }
       server->rc.m_bSendCounter = FALSE;
+
+      if (server->rc.Link.extras.o_props)
+        {
+          AMF_Reset(&server->rc.Link.extras);
+        }
+    }
+  else if (AVMATCH(&method, &av_NetStream_Authenticate_UsherToken))
+    {
+      AMFProp_GetString(AMF_GetProp(&obj, NULL, 3), &server->rc.Link.usherToken);
+      RTMP_LogPrintf("%10s : %.*s\n", "usherToken", server->rc.Link.usherToken.av_len, server->rc.Link.usherToken.av_val);
     }
   else if (AVMATCH(&method, &av_play))
     {
