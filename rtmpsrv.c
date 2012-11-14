@@ -786,6 +786,12 @@ ServeInvoke(STREAMING_SERVER *server, RTMP * r, RTMPPacket *packet, unsigned int
 	    }
 	  else
 	    {
+	      if (RTMP_ctrlC)
+	        {
+	          printf("%s\n", cmd);
+	          fflush(stdout);
+	          exit(0);
+	        }
 	      printf("\n%s\n\n", cmd);
 	      fflush(stdout);
 	      server->filetime = now;
@@ -1114,11 +1120,26 @@ sigIntHandler(int sig)
   signal(SIGINT, SIG_DFL);
 }
 
+void usage()
+{
+  RTMP_LogPrintf
+    (
+      "This is just a stub for an RTMP server. It doesn't do anything beyond\n"
+      "obtaining the connection parameters from the client.\n\n"
+      "-c, --cert cert         RTMPS cert\n"
+      "-h, --help              Prints this help screen.\n"
+      "-i, --printonly         Print RtmpDump command and exit\n"
+      "-k, --key key           RTMPS key\n"
+      "-p, --port port         Overrides the port in the rtmp url\n"
+      "-v, --version           Print version information and exit\n"
+      "-z, --debug             Debug level command output.\n"
+    );
+}
+
 int
 main(int argc, char **argv)
 {
   int nStatus = RD_SUCCESS;
-  int i;
 
   // http streaming server
   char DEFAULT_HTTP_STREAMING_DEVICE[] = "0.0.0.0";	// 0.0.0.0 is any device
@@ -1127,20 +1148,54 @@ main(int argc, char **argv)
   int nRtmpStreamingPort = 1935;	// port
   char *cert = NULL, *key = NULL;
 
-  RTMP_LogPrintf("RTMP Server %s\n", RTMPDUMP_VERSION);
-  RTMP_LogPrintf("(c) 2010 Andrej Stepanchuk, Howard Chu; license: GPL\n\n");
-
   RTMP_debuglevel = RTMP_LOGINFO;
 
-  for (i = 1; i < argc; i++)
+  int opt;
+  struct option longopts[] = {
+    {"cert", 1, NULL, 'c'},
+    {"help", 0, NULL, 'h'},
+    {"printonly", 0, NULL, 'i'},
+    {"key", 1, NULL, 'k'},
+    {"port", 1, NULL, 'p'},
+    {"version", 0, NULL, 'v'},
+    {"debug", 0, NULL, 'z'},
+    {0, 0, 0, 0}
+  };
+
+  while ((opt = getopt_long(argc, argv, "c:hik:p:vz", longopts, NULL)) != -1)
     {
-      if (!strcmp(argv[i], "-z"))
-        RTMP_debuglevel = RTMP_LOGALL;
-      else if (!strcmp(argv[i], "-c") && i + 1 < argc)
-        cert = argv[++i];
-      else if (!strcmp(argv[i], "-k") && i + 1 < argc)
-        key = argv[++i];
+      switch (opt)
+        {
+          case 'c':
+            cert = optarg;
+            break;
+          case 'h':
+            usage();
+            return RD_SUCCESS;
+          case 'i':
+            RTMP_ctrlC = 1;
+            break;
+          case 'k':
+            key = optarg;
+            break;
+          case 'p':
+            if (atoi(optarg))
+              nRtmpStreamingPort = atoi(optarg);
+            break;
+          case 'v':
+            printf("RTMP Server %s\n", RTMPDUMP_VERSION);
+            return RD_SUCCESS;
+          case 'z':
+            RTMP_debuglevel = RTMP_LOGALL;
+            break;
+          default:
+            usage();
+            return RD_FAILED;
+        }
     }
+
+  RTMP_LogPrintf("RTMP Server %s\n", RTMPDUMP_VERSION);
+  RTMP_LogPrintf("(c) 2010 Andrej Stepanchuk, Howard Chu; license: GPL\n\n");
 
   if (cert && key)
     sslCtx = RTMP_TLS_AllocServerContext(cert, key);
