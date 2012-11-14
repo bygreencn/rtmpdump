@@ -336,10 +336,12 @@ RTMP_Init(RTMP *r)
   r->m_nClientBW = 2500000;
   r->m_nClientBW2 = 2;
   r->m_nServerBW = 2500000;
-  r->m_fAudioCodecs = 3191.0;
+  r->m_fAudioCodecs = 3575.0;
   r->m_fVideoCodecs = 252.0;
   r->Link.timeout = 30;
   r->Link.swfAge = 30;
+  r->Link.CombineConnectPacket = TRUE;
+  r->Link.ConnectPacket = FALSE;
 }
 
 void
@@ -1512,6 +1514,16 @@ WriteN(RTMP *r, const char *buffer, int n)
     }
 #endif
 
+  if (r->Link.ConnectPacket)
+    {
+      char *ConnectPacket = malloc(r->Link.HandshakeResponse.av_len + n);
+      memcpy(ConnectPacket, r->Link.HandshakeResponse.av_val, r->Link.HandshakeResponse.av_len);
+      memcpy(ConnectPacket + r->Link.HandshakeResponse.av_len, ptr, n);
+      ptr = ConnectPacket;
+      n += r->Link.HandshakeResponse.av_len;
+      r->Link.ConnectPacket = FALSE;
+    }
+
   while (n > 0)
     {
       int nBytes;
@@ -1576,6 +1588,9 @@ SendConnectPacket(RTMP *r, RTMPPacket *cp)
   RTMPPacket packet;
   char pbuf[4096], *pend = pbuf + sizeof(pbuf);
   char *enc;
+
+  if (r->Link.CombineConnectPacket)
+    r->Link.ConnectPacket = TRUE;
 
   if (cp)
     return RTMP_SendPacket(r, cp, TRUE);

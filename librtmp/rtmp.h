@@ -174,10 +174,15 @@ extern "C"
     int lFlags;
 
     int swfAge;
+    int swfSize;
 
     int protocol;
+    int ConnectPacket;
+    int CombineConnectPacket;
     int redirected;
     int timeout;		/* connection timeout in seconds */
+    AVal Extras;
+    AVal HandshakeResponse;
 
 #define RTMP_PUB_NAME   0x0001  /* send login to server */
 #define RTMP_PUB_RESP   0x0002  /* send salted password hash */
