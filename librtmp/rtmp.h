@@ -176,6 +176,7 @@ extern "C"
     int swfAge;
 
     int protocol;
+    int redirected;
     int timeout;		/* connection timeout in seconds */
 
 #define RTMP_PUB_NAME   0x0001  /* send login to server */
