@@ -293,8 +293,8 @@ GetLastKeyframe(FILE * file,	// output file [in]
 
   bAudioOnly = (dataType & 0x4) && !(dataType & 0x1);
 
-  RTMP_Log(RTMP_LOGDEBUG, "bAudioOnly: %d, size: %llu", bAudioOnly,
-      (unsigned long long) size);
+  RTMP_Log(RTMP_LOGDEBUG, "bAudioOnly: %d, size: %lu", bAudioOnly,
+      (unsigned long) size);
 
   // ok, we have to get the timestamp of the last keyframe (only keyframes are seekable) / last audio frame (audio only streams)
 
