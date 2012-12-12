@@ -3340,6 +3340,7 @@ DumpMetaData(AMFObject *obj)
 		   prop->p_vu.p_number != 0. ? "TRUE" : "FALSE");
 	  break;
 	case AMF_STRING:
+	case AMF_NULL:
 	  len = snprintf(str, 255, "%.*s", prop->p_vu.p_aval.av_len,
 		   prop->p_vu.p_aval.av_val);
 	  if (len >= 1 && str[len-1] == '\n')
