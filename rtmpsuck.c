@@ -203,12 +203,12 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
             }
           if (AVMATCH(&pname, &av_app))
             {
-              server->rc.Link.app = pval;
+              server->rc.Link.app = AVcopy(pval);
               pval.av_val = NULL;
             }
           else if (AVMATCH(&pname, &av_flashVer))
             {
-              server->rc.Link.flashVer = pval;
+              server->rc.Link.flashVer = AVcopy(pval);
               pval.av_val = NULL;
             }
           else if (AVMATCH(&pname, &av_swfUrl))
@@ -218,7 +218,7 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
 	        RTMP_HashSWF(pval.av_val, &server->rc.Link.SWFSize,
 		  (unsigned char *)server->rc.Link.SWFHash, 30);
 #endif
-              server->rc.Link.swfUrl = pval;
+              server->rc.Link.swfUrl = AVcopy(pval);
               pval.av_val = NULL;
             }
           else if (AVMATCH(&pname, &av_tcUrl))
@@ -226,7 +226,7 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
               char *r1 = NULL, *r2;
               int len;
 
-              server->rc.Link.tcUrl = pval;
+              server->rc.Link.tcUrl = AVcopy(pval);
               if ((pval.av_val[0] | 0x40) == 'r' &&
                   (pval.av_val[1] | 0x40) == 't' &&
                   (pval.av_val[2] | 0x40) == 'm' &&
@@ -268,7 +268,7 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
             }
           else if (AVMATCH(&pname, &av_pageUrl))
             {
-              server->rc.Link.pageUrl = pval;
+              server->rc.Link.pageUrl = AVcopy(pval);
               pval.av_val = NULL;
             }
           else if (AVMATCH(&pname, &av_audioCodecs))
@@ -383,9 +383,35 @@ ServeInvoke(STREAMING_SERVER *server, int which, RTMPPacket *pack, const char *b
       for (p=file; *p; p++)
         if (*p == ':')
           *p = '_';
-      RTMP_LogPrintf("Playpath: %.*s\nSaving as: %s\n",
-        server->rc.Link.playpath.av_len, server->rc.Link.playpath.av_val,
-        file);
+      RTMP_LogPrintf("Playpath: %.*s\n",
+        server->rc.Link.playpath.av_len, server->rc.Link.playpath.av_val);
+
+      if (RTMP_ctrlC)
+  {
+    /* Dump command to file */
+    char *cmd = NULL, *ptr = NULL;
+    AVal tcUrl;
+    cmd = calloc (2048, sizeof (char));
+    ptr = cmd;
+    tcUrl = StripParams (&server->rc.Link.tcUrl);
+    ptr += sprintf(ptr, "rtmpdump -r \"%.*s\" -a \"%.*s\" -f \"%.*s\""
+      " -W \"%.*s\" -p \"%.*s\" -y \"%.*s\" -o a.flv",
+      tcUrl.av_len, tcUrl.av_val,
+      server->rc.Link.app.av_len, server->rc.Link.app.av_val,
+      server->rc.Link.flashVer.av_len, server->rc.Link.flashVer.av_val,
+      server->rc.Link.swfUrl.av_len, server->rc.Link.swfUrl.av_val,
+      server->rc.Link.pageUrl.av_len, server->rc.Link.pageUrl.av_val,
+      server->rc.Link.playpath.av_len, server->rc.Link.playpath.av_val);
+
+    FILE *cmdfile;
+    cmdfile = fopen ("rtmpsuck.txt", "wb");
+    fprintf (cmdfile, "%s\n", cmd);
+    fclose (cmdfile);
+    free (cmd);
+    exit (0);
+  }
+
+      RTMP_LogPrintf("Saving as: %s\n", file);
       out = fopen(file, "wb");
       free(file);
       if (!out)
@@ -1145,6 +1171,20 @@ sigIntHandler(int sig)
   signal(SIGINT, SIG_DFL);
 }
 
+void
+usage()
+{
+  RTMP_LogPrintf(
+    "This is a Proxy Server that displays the connection parameters from a\n"
+    "client and then saves any data streamed to the client.\n"
+    "\n"
+    "-h, --help     prints this help screen\n"
+    "-t, --txt      copy RtmpDump command to rtmpsuck.txt and exit\n"
+    "-v, --version  print version information and exit\n"
+    "-z, --debug    debug level command output\n"
+  );
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1156,13 +1196,41 @@ main(int argc, char **argv)
   char *rtmpStreamingDevice = DEFAULT_RTMP_STREAMING_DEVICE;	// streaming device, default 0.0.0.0
   int nRtmpStreamingPort = 1935;	// port
 
-  RTMP_LogPrintf("RTMP Proxy Server %s\n", RTMPDUMP_VERSION);
-  RTMP_LogPrintf("(c) 2010 Andrej Stepanchuk, Howard Chu; license: GPL\n\n");
-
   RTMP_debuglevel = RTMP_LOGINFO;
 
-  if (argc > 1 && !strcmp(argv[1], "-z"))
-    RTMP_debuglevel = RTMP_LOGALL;
+  struct option longopts[] = {
+    {"help", 0, NULL, 'h'},
+    {"txt", 0, NULL, 't'},
+    {"version", 0, NULL, 'v'},
+    {"debug", 0, NULL, 'z'},
+    {0, 0, 0, 0}
+  };
+
+  int opt;
+  while ((opt = getopt_long(argc, argv, "htvz", longopts, NULL)) != -1)
+    {
+      switch (opt)
+        {
+          case 'h':
+            usage();
+            return RD_SUCCESS;
+          case 't':
+            RTMP_ctrlC = 1;
+            break;
+          case 'v':
+            printf("RTMP Proxy Server %s\n", RTMPDUMP_VERSION);
+            return RD_SUCCESS;
+          case 'z':
+            RTMP_debuglevel = RTMP_LOGALL;
+            break;
+          default:
+            usage();
+            return RD_FAILED;
+        }
+    }
+
+  RTMP_LogPrintf("RTMP Proxy Server %s\n", RTMPDUMP_VERSION);
+  RTMP_LogPrintf("(c) 2010 Andrej Stepanchuk, Howard Chu; license: GPL\n\n");
 
   signal(SIGINT, sigIntHandler);
 #ifndef WIN32

@@ -379,3 +379,22 @@ StripParams(AVal *src)
   str = *src;
   return str;
 }
+
+AVal
+AVcopy(AVal src)
+{
+  AVal dst;
+  if (src.av_len)
+    {
+      dst.av_val = malloc(src.av_len + 1);
+      memcpy(dst.av_val, src.av_val, src.av_len);
+      dst.av_val[src.av_len] = '\0';
+      dst.av_len = src.av_len;
+    }
+  else
+    {
+      dst.av_val = NULL;
+      dst.av_len = 0;
+    }
+  return dst;
+}
