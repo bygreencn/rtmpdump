@@ -403,6 +403,13 @@ void
 spawn_dumper(int argc, AVal *av, char *cmd)
 {
 #ifdef WIN32
+  HANDLE jb = CreateJobObject (NULL, NULL);
+  JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli;
+
+  jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+  SetInformationJobObject(jb, JobObjectExtendedLimitInformation, &jeli,
+    sizeof(jeli));
+
   STARTUPINFO si = {0};
   PROCESS_INFORMATION pi = {0};
 
@@ -410,6 +417,7 @@ spawn_dumper(int argc, AVal *av, char *cmd)
   if (CreateProcess(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL,
     &si, &pi))
     {
+      AssignProcessToJobObject (jb, pi.hProcess);
       CloseHandle(pi.hThread);
       CloseHandle(pi.hProcess);
     }
