@@ -298,6 +298,7 @@ extern "C"
   void RTMP_ParsePlaypath(AVal *in, AVal *out);
   AVal StripParams(AVal *src);
   AVal AVcopy(AVal src);
+  void spawn_dumper(int argc, AVal *av, char *cmd);
   void http_unescape(char *data);
   void RTMP_SetBufferMS(RTMP *r, int size);
   void RTMP_UpdateBufferMS(RTMP *r);

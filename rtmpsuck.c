@@ -1178,6 +1178,7 @@ usage()
     "This is a Proxy Server that displays the connection parameters from a\n"
     "client and then saves any data streamed to the client.\n"
     "\n"
+    "-e, --helper   launch RtmpDumpHelper\n"
     "-h, --help     prints this help screen\n"
     "-t, --txt      copy RtmpDump command to rtmpsuck.txt and exit\n"
     "-v, --version  print version information and exit\n"
@@ -1199,6 +1200,7 @@ main(int argc, char **argv)
   RTMP_debuglevel = RTMP_LOGINFO;
 
   struct option longopts[] = {
+    {"helper", 0, NULL, 'e'},
     {"help", 0, NULL, 'h'},
     {"txt", 0, NULL, 't'},
     {"version", 0, NULL, 'v'},
@@ -1207,10 +1209,13 @@ main(int argc, char **argv)
   };
 
   int opt;
-  while ((opt = getopt_long(argc, argv, "htvz", longopts, NULL)) != -1)
+  while ((opt = getopt_long(argc, argv, "ehtvz", longopts, NULL)) != -1)
     {
       switch (opt)
         {
+          case 'e':
+            spawn_dumper (0, 0, "rtmpdumphelper");
+            break;
           case 'h':
             usage();
             return RD_SUCCESS;

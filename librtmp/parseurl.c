@@ -398,3 +398,36 @@ AVcopy(AVal src)
     }
   return dst;
 }
+
+void
+spawn_dumper(int argc, AVal *av, char *cmd)
+{
+#ifdef WIN32
+  STARTUPINFO si = {0};
+  PROCESS_INFORMATION pi = {0};
+
+  si.cb = sizeof(si);
+  if (CreateProcess(NULL, cmd, NULL, NULL, FALSE, 0, NULL, NULL,
+    &si, &pi))
+    {
+      CloseHandle(pi.hThread);
+      CloseHandle(pi.hProcess);
+    }
+#else
+  /* reap any dead children */
+  while (waitpid(-1, NULL, WNOHANG) > 0);
+
+  if (fork() == 0) {
+    char **argv = malloc((argc+1) * sizeof(char *));
+    int i;
+
+    for (i=0; i<argc; i++) {
+      argv[i] = av[i].av_val;
+      argv[i][av[i].av_len] = '\0';
+    }
+    argv[i] = NULL;
+    if ((i = execvp(argv[0], argv)))
+      _exit(i);
+  }
+#endif
+}
