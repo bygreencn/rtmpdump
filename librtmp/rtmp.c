@@ -120,6 +120,8 @@ static int SendFCSubscribe(RTMP *r, AVal *subscribepath);
 static int SendPlay(RTMP *r);
 static int SendBytesReceived(RTMP *r);
 static int SendUsherToken(RTMP *r, AVal *usherToken);
+static int SendInvoke(RTMP *r, AVal *Command, int queue);
+static int strsplit(char *src, int srclen, char delim, char ***params);
 
 #if 0				/* unused */
 static int SendBGHasStream(RTMP *r, double dId, AVal *playpath);
@@ -2918,6 +2920,8 @@ AVC("NetStream.Play.UnpublishNotify");
 static const AVal av_NetStream_Publish_Start = AVC("NetStream.Publish.Start");
 static const AVal av_NetConnection_Connect_Rejected =
 AVC("NetConnection.Connect.Rejected");
+static const AVal av_NetConnection_confStream =
+AVC("NetConnection.confStream");
 
 /* Returns 0 for OK/Failed/error, 1 for 'Stop or Complete' */
 static int
@@ -2927,6 +2931,9 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
   AVal method;
   double txn;
   int ret = 0, nRes;
+  char pbuf[256], *pend = pbuf + sizeof (pbuf), *enc, **params = NULL;
+  int param_count;
+  AVal av_Command;
   if (body[0] != 0x02)		/* make sure it is a string method name we start with */
     {
       RTMP_Log(RTMP_LOGWARNING, "%s, Sanity failed. no string method in invoke packet",
@@ -3174,10 +3181,11 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
   else if (AVMATCH(&method, &av_onStatus))
     {
       AMFObject obj2;
-      AVal code, level;
+      AVal code, level, description;
       AMFProp_GetObject(AMF_GetProp(&obj, NULL, 3), &obj2);
       AMFProp_GetString(AMF_GetProp(&obj2, &av_code, -1), &code);
       AMFProp_GetString(AMF_GetProp(&obj2, &av_level, -1), &level);
+      AMFProp_GetString(AMF_GetProp(&obj2, &av_description, -1), &description);
 
       RTMP_Log(RTMP_LOGDEBUG, "%s, onStatus: %s", __FUNCTION__, code.av_val);
       if (AVMATCH(&code, &av_NetStream_Failed)
@@ -3241,6 +3249,48 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
 	    r->m_pausing = 3;
 	  }
 	}
+
+      else if (AVMATCH(&code, &av_NetConnection_confStream))
+  {
+#ifdef CRYPTO
+    static const char hexdig[] = "0123456789abcdef";
+    AVal auth;
+    SAVC(cf_stream);
+    int i;
+    char hash_hex[33] = {0};
+    unsigned char hash[16];
+
+    param_count = strsplit(description.av_val, description.av_len, ':',
+      &params);
+    if (param_count >= 3)
+      {
+        char *buf = malloc(strlen(params[0]) + r->Link.playpath.av_len + 1);
+        strcpy(buf, params[0]);
+        strncat(buf, r->Link.playpath.av_val, r->Link.playpath.av_len);
+        md5_hash((unsigned char *) buf, strlen(buf), hash);
+        for (i = 0; i < 16; i++)
+          {
+            hash_hex[i * 2] = hexdig[0x0f & (hash[i] >> 4)];
+            hash_hex[i * 2 + 1] = hexdig[0x0f & (hash[i])];
+          }
+        auth.av_val = &hash_hex[atoi(params[1]) - 1];
+        auth.av_len = atoi(params[2]);
+        RTMP_Log(RTMP_LOGDEBUG, "Khalsa: %.*s", auth.av_len, auth.av_val);
+
+        enc = pbuf;
+        enc = AMF_EncodeString(enc, pend, &av_cf_stream);
+        enc = AMF_EncodeNumber(enc, pend, txn);
+        *enc++ = AMF_NULL;
+        enc = AMF_EncodeString(enc, pend, &auth);
+        av_Command.av_val = pbuf;
+        av_Command.av_len = enc - pbuf;
+
+        SendInvoke(r, &av_Command, FALSE);
+        free(buf);
+      }
+#endif
+  }
+
     }
   else if (AVMATCH(&method, &av_playlist_ready))
     {
@@ -5225,4 +5275,74 @@ RTMP_Write(RTMP *r, const char *buf, int size)
 	}
     }
   return size+s2;
+}
+
+static int
+SendInvoke(RTMP *r, AVal *Command, int queue)
+{
+  RTMPPacket packet;
+  char pbuf[512], *enc;
+
+  packet.m_nChannel = 0x03; /* control channel (invoke) */
+  packet.m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+  packet.m_packetType = RTMP_PACKET_TYPE_INVOKE;
+  packet.m_nTimeStamp = 0;
+  packet.m_nInfoField2 = 0;
+  packet.m_hasAbsTimestamp = 0;
+  packet.m_body = pbuf + RTMP_MAX_HEADER_SIZE;
+
+  enc = packet.m_body;
+  if (Command->av_len)
+    {
+      memcpy(enc, Command->av_val, Command->av_len);
+      enc += Command->av_len;
+    }
+  else
+    return FALSE;
+  packet.m_nBodySize = enc - packet.m_body;
+
+  return RTMP_SendPacket(r, &packet, queue);
+}
+
+static int
+strsplit(char *src, int srclen, char delim, char ***params)
+{
+  char *sptr, *srcbeg, *srcend, *dstr;
+  int count = 1, i = 0, len = 0;
+
+  if (src == NULL)
+    return 0;
+  if (!srclen)
+    srclen = strlen(src);
+  srcbeg = src;
+  srcend = srcbeg + srclen;
+  sptr = srcbeg;
+
+  /* count the delimiters */
+  while (sptr < srcend)
+    {
+      if (*sptr++ == delim)
+        count++;
+    }
+  sptr = srcbeg;
+  *params = calloc(count, sizeof (size_t));
+  char **param = *params;
+
+  for (i = 0; i < (count - 1); i++)
+    {
+      dstr = strchr(sptr, delim);
+      len = dstr - sptr;
+      param[i] = calloc(len + 1, sizeof (char));
+      strncpy(param[i], sptr, len);
+      sptr += len + 1;
+    }
+
+  /* copy the last string */
+  if (sptr <= srcend)
+    {
+      len = srclen - (sptr - srcbeg);
+      param[i] = calloc(len + 1, sizeof (char));
+      strncpy(param[i], sptr, len);
+    }
+  return count;
 }

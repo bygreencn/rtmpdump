@@ -105,6 +105,7 @@ typedef struct tls_server_ctx {
 #define TLS_write(s,b,l)	ssl_write(s,(unsigned char *)b,l)
 #define TLS_shutdown(s)	ssl_close_notify(s)
 #define TLS_close(s)	ssl_free(s); free(s)
+#define md5_hash(i, ilen, o) md5(i, ilen, o)
 
 #elif defined(USE_GNUTLS)
 #include <gnutls/gnutls.h>
