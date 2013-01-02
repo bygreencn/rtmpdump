@@ -638,87 +638,99 @@ Download(RTMP * rtmp,		// connected RTMP object
 
 void usage(char *prog)
 {
-	  RTMP_LogPrintf
-	    ("\n%s: This program dumps the media content streamed over RTMP.\n\n", prog);
-	  RTMP_LogPrintf("--help|-h               Prints this help screen.\n");
-	  RTMP_LogPrintf
-	    ("--url|-i url            URL with options included (e.g. rtmp://host[:port]/path swfUrl=url tcUrl=url)\n");
-	  RTMP_LogPrintf
-	    ("--rtmp|-r url           URL (e.g. rtmp://host[:port]/path)\n");
-	  RTMP_LogPrintf
-	    ("--host|-n hostname      Overrides the hostname in the rtmp url\n");
-	  RTMP_LogPrintf
-	    ("--port|-c port          Overrides the port in the rtmp url\n");
-	  RTMP_LogPrintf
-	    ("--socks|-S host:port    Use the specified SOCKS proxy\n");
-	  RTMP_LogPrintf
-	    ("--protocol|-l num       Overrides the protocol in the rtmp url (0 - RTMP, 2 - RTMPE)\n");
-	  RTMP_LogPrintf
-	    ("--playpath|-y path      Overrides the playpath parsed from rtmp url\n");
-	  RTMP_LogPrintf
-	    ("--playlist|-Y           Set playlist before playing\n");
-	  RTMP_LogPrintf("--swfUrl|-s url         URL to player swf file\n");
-	  RTMP_LogPrintf
-	    ("--tcUrl|-t url          URL to played stream (default: \"rtmp://host[:port]/app\")\n");
-	  RTMP_LogPrintf("--pageUrl|-p url        Web URL of played programme\n");
-	  RTMP_LogPrintf("--app|-a app            Name of target app on server\n");
+  RTMP_LogPrintf("This program dumps the media content streamed over RTMP.\n");
+  RTMP_LogPrintf("\n");
+  RTMP_LogPrintf(" -h, --help               prints this help screen\n");
+  RTMP_LogPrintf(" -i, --url URL            URL with options included\n");
+  RTMP_LogPrintf
+    ("                          e.g. rtmp://host[:port]/path swfUrl=url tcUrl=url\n");
+  RTMP_LogPrintf
+    (" -r, --rtmp URL           URL (e.g. rtmp://host[:port]/path)\n");
+  RTMP_LogPrintf
+    (" -n, --host hostname      overrides the hostname in the RTMP URL\n");
+  RTMP_LogPrintf
+    (" -c, --port port          overrides the port in the RTMP URL\n");
+  RTMP_LogPrintf(" -S, --socks host:port    use the specified SOCKS proxy\n");
+  RTMP_LogPrintf
+    (" -l, --protocol num       overrides the protocol in the RTMP URL\n");
+  RTMP_LogPrintf("                          0 = RTMP, 2 = RTMPE\n");
+  RTMP_LogPrintf
+    (" -y, --playpath path      overrides the playpath parsed from RTMP URL\n");
+  RTMP_LogPrintf(" -Y, --playlist           set playlist before playing\n");
+  RTMP_LogPrintf(" -s, --swfUrl URL         URL to player SWF file\n");
+  RTMP_LogPrintf(" -t, --tcUrl URL          URL to played stream\n");
+  RTMP_LogPrintf
+    ("                          default: \"rtmp://host[:port]/app\"\n");
+  RTMP_LogPrintf(" -p, --pageUrl URL        web URL of played program\n");
+  RTMP_LogPrintf(" -a, --app app            name of target app on server\n");
 #ifdef CRYPTO
-	  RTMP_LogPrintf
-	    ("--swfhash|-w hexstring  SHA256 hash of the decompressed SWF file (32 bytes)\n");
-	  RTMP_LogPrintf
-	    ("--swfsize|-x num        Size of the decompressed SWF file, required for SWFVerification\n");
-	  RTMP_LogPrintf
-	    ("--swfVfy|-W url         URL to player swf file, compute hash/size automatically\n");
-	  RTMP_LogPrintf
-	    ("--swfAge|-X days        Number of days to use cached SWF hash before refreshing\n");
+  RTMP_LogPrintf
+    (" -w, --swfhash hexstring  SHA256 hash of the decompressed SWF file (32 bytes)\n");
+  RTMP_LogPrintf
+    (" -x, --swfsize num        size of the decompressed SWF file, required for\n");
+  RTMP_LogPrintf("                          SWFVerification\n");
+  RTMP_LogPrintf
+    (" -W, --swfVfy URL         URL to player SWF file, compute hash/size\n");
+  RTMP_LogPrintf("                          automatically\n");
+  RTMP_LogPrintf
+    (" -X, --swfAge days        number of days to use cached SWF hash before\n");
+  RTMP_LogPrintf("                          refreshing\n");
 #endif
-	  RTMP_LogPrintf
-	    ("--auth|-u string        Authentication string to be appended to the connect string\n");
-	  RTMP_LogPrintf
-	    ("--conn|-C type:data     Arbitrary AMF data to be appended to the connect string\n");
-	  RTMP_LogPrintf
-	    ("                        B:boolean(0|1), S:string, N:number, O:object-flag(0|1),\n");
-	  RTMP_LogPrintf
-	    ("                        Z:(null), NB:name:boolean, NS:name:string, NN:name:number\n");
-	  RTMP_LogPrintf
-	    ("--flashVer|-f string    Flash version string (default: \"%s\")\n",
-	     RTMP_DefaultFlashVer.av_val);
-	  RTMP_LogPrintf
-	    ("--live|-v               Save a live stream, no --resume (seeking) of live streams possible\n");
-	  RTMP_LogPrintf
-	    ("--subscribe|-d string   Stream name to subscribe to (otherwise defaults to playpath if live is specifed)\n");
-	  RTMP_LogPrintf
-	    ("--realtime|-R           Don't attempt to speed up download via the Pause/Unpause BUFX hack\n");
-	  RTMP_LogPrintf
-	    ("--flv|-o string         FLV output file name, if the file name is - print stream to stdout\n");
-	  RTMP_LogPrintf
-	    ("--resume|-e             Resume a partial RTMP download\n");
-	  RTMP_LogPrintf
-	    ("--timeout|-m num        Timeout connection num seconds (default: %u)\n",
-	     DEF_TIMEOUT);
-	  RTMP_LogPrintf
-	    ("--start|-A num          Start at num seconds into stream (not valid when using --live)\n");
-	  RTMP_LogPrintf
-	    ("--stop|-B num           Stop at num seconds into stream\n");
-	  RTMP_LogPrintf
-	    ("--token|-T key          Key for SecureToken response\n");
-	  RTMP_LogPrintf
-	    ("--jtv|-j JSON           Authentication token for Justin.tv legacy servers\n");
-	  RTMP_LogPrintf
-	    ("--hashes|-#             Display progress with hashes, not with the byte counter\n");
-	  RTMP_LogPrintf
-	    ("--buffer|-b             Buffer time in milliseconds (default: %u)\n",
-	     DEF_BUFTIME);
-	  RTMP_LogPrintf
-	    ("--skip|-k num           Skip num keyframes when looking for last keyframe to resume from. Useful if resume fails (default: %d)\n\n",
-	     DEF_SKIPFRM);
-	  RTMP_LogPrintf
-	    ("--quiet|-q              Suppresses all command output.\n");
-	  RTMP_LogPrintf("--verbose|-V            Verbose command output.\n");
-	  RTMP_LogPrintf("--debug|-z              Debug level command output.\n");
-	  RTMP_LogPrintf
-	    ("If you don't pass parameters for swfUrl, pageUrl, or auth these properties will not be included in the connect ");
-	  RTMP_LogPrintf("packet.\n\n");
+  RTMP_LogPrintf
+    (" -u, --auth string        authentication string to be appended to the connect\n");
+  RTMP_LogPrintf("                          string\n");
+  RTMP_LogPrintf
+    (" -C, --conn type:data     arbitrary AMF data to be appended to the connect\n");
+  RTMP_LogPrintf("                          string\n");
+  RTMP_LogPrintf
+    ("                          B:boolean(0|1), S:string, N:number,\n");
+  RTMP_LogPrintf
+    ("                          O:object-flag(0|1), Z:(null), NB:name:boolean,\n");
+  RTMP_LogPrintf("                          NS:name:string, NN:name:number\n");
+  RTMP_LogPrintf(" -f, --flashVer string    Flash version string\n");
+  RTMP_LogPrintf("                          default: \"%s\"\n",
+    RTMP_DefaultFlashVer.av_val);
+  RTMP_LogPrintf
+    (" -v, --live               save a live stream, no --resume (seeking) of live\n");
+  RTMP_LogPrintf("                          streams possible\n");
+  RTMP_LogPrintf
+    (" -d, --subscribe string   stream name to subscribe to (otherwise defaults to\n");
+  RTMP_LogPrintf("                          playpath if live is specifed)\n");
+  RTMP_LogPrintf
+    (" -R, --realtime           do not attempt to speed up download via the\n");
+  RTMP_LogPrintf("                          Pause/Unpause BUFX hack\n");
+  RTMP_LogPrintf
+    (" -o, --flv string         FLV output file name, if the file name is - print\n");
+  RTMP_LogPrintf("                          stream to stdout\n");
+  RTMP_LogPrintf(" -e, --resume             resume a partial RTMP download\n");
+  RTMP_LogPrintf
+    (" -m, --timeout num        timeout connection num seconds (default: %u)\n",
+    DEF_TIMEOUT);
+  RTMP_LogPrintf
+    (" -A, --start num          start at num seconds into stream (not valid when\n");
+  RTMP_LogPrintf("                          using --live)\n");
+  RTMP_LogPrintf(" -B, --stop num           stop at num seconds into stream\n");
+  RTMP_LogPrintf(" -T, --token key          key for SecureToken response\n");
+  RTMP_LogPrintf
+    (" -j, --jtv JSON           authentication token for Justin.tv legacy servers\n");
+  RTMP_LogPrintf
+    (" -#, --hashes             display progress with hashes, not with the byte\n");
+  RTMP_LogPrintf("                          counter\n");
+  RTMP_LogPrintf
+    (" -b, --buffer             buffer time in milliseconds (default: %u)\n",
+    DEF_BUFTIME);
+  RTMP_LogPrintf
+    (" -k, --skip num           skip num keyframes when looking for last keyframe to\n");
+  RTMP_LogPrintf
+    ("                          resume from. Useful if resume fails (default: %d)\n",
+    DEF_SKIPFRM);
+  RTMP_LogPrintf(" -q, --quiet              suppresses all command output\n");
+  RTMP_LogPrintf(" -V, --verbose            verbose command output\n");
+  RTMP_LogPrintf(" -z, --debug              debug level command output\n");
+  RTMP_LogPrintf("\n");
+  RTMP_LogPrintf
+    ("If you do not pass parameters for swfUrl, pageUrl, or auth these properties\n");
+  RTMP_LogPrintf("will not be included in the connect packet.\n");
 }
 
 int
