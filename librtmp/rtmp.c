@@ -28,6 +28,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <math.h>
 
 #include "rtmp_sys.h"
 #include "log.h"
@@ -2922,6 +2923,7 @@ static const AVal av_NetConnection_Connect_Rejected =
 AVC("NetConnection.Connect.Rejected");
 static const AVal av_NetConnection_confStream =
 AVC("NetConnection.confStream");
+static const AVal av_verifyClient = AVC("verifyClient");
 
 /* Returns 0 for OK/Failed/error, 1 for 'Stop or Complete' */
 static int
@@ -2933,7 +2935,7 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
   int ret = 0, nRes;
   char pbuf[256], *pend = pbuf + sizeof (pbuf), *enc, **params = NULL;
   int param_count;
-  AVal av_Command;
+  AVal av_Command, av_Response;
   if (body[0] != 0x02)		/* make sure it is a string method name we start with */
     {
       RTMP_Log(RTMP_LOGWARNING, "%s, Sanity failed. no string method in invoke packet",
@@ -3303,6 +3305,23 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
 	      break;
 	    }
         }
+    }
+  else if (AVMATCH(&method, &av_verifyClient))
+    {
+      double VerificationNumber = AMFProp_GetNumber(AMF_GetProp(&obj, NULL, 3));
+      RTMP_Log(RTMP_LOGDEBUG, "VerificationNumber: %.2f", VerificationNumber);
+
+      enc = pbuf;
+      enc = AMF_EncodeString(enc, pend, &av__result);
+      enc = AMF_EncodeNumber(enc, pend, txn);
+      *enc++ = AMF_NULL;
+      enc = AMF_EncodeNumber(enc, pend, exp(atan(sqrt(VerificationNumber))) + 1);
+      av_Response.av_val = pbuf;
+      av_Response.av_len = enc - pbuf;
+
+      AMF_Decode(&obj, av_Response.av_val, av_Response.av_len, FALSE);
+      AMF_Dump(&obj);
+      SendInvoke(r, &av_Response, FALSE);
     }
   else
     {
