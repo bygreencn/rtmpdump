@@ -2934,6 +2934,8 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
   double txn;
   int ret = 0, nRes;
   char pbuf[256], *pend = pbuf + sizeof (pbuf), *enc, **params = NULL;
+  char *host = r->Link.hostname.av_len ? r->Link.hostname.av_val : "";
+  char *pageUrl = r->Link.pageUrl.av_len ? r->Link.pageUrl.av_val : "";
   int param_count;
   AVal av_Command, av_Response;
   if (body[0] != 0x02)		/* make sure it is a string method name we start with */
@@ -2997,7 +2999,20 @@ HandleInvoke(RTMP *r, const char *body, unsigned int nBodySize)
 	      RTMP_SendServerBW(r);
 	      RTMP_SendCtrl(r, 3, 0, 300);
 	    }
-	  RTMP_SendCreateStream(r);
+    if (strstr(host, "featve.com") || strstr(pageUrl, "featve.com"))
+      {
+        AVal av_auth = AVC("yes");
+        SAVC(allowMePlay);
+        enc = pbuf;
+        enc = AMF_EncodeString(enc, pend, &av_allowMePlay);
+        enc = AMF_EncodeNumber(enc, pend, ++r->m_numInvokes);
+        *enc++ = AMF_NULL;
+        enc = AMF_EncodeString(enc, pend, &av_auth);
+        av_Command.av_val = pbuf;
+        av_Command.av_len = enc - pbuf;
+        SendInvoke(r, &av_Command, FALSE);
+      }
+    RTMP_SendCreateStream(r);
 
 	  if (!(r->Link.protocol & RTMP_FEATURE_WRITE))
 	    {
