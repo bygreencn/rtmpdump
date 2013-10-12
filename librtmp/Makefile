@@ -1,4 +1,4 @@
-VERSION=v2.4
+VERSION=v2.4-2013.10.10
 
 prefix=/usr/local
 
@@ -15,7 +15,7 @@ CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
 AR=$(CROSS_COMPILE)ar
 
-SYS=posix
+SYS=mingw
 CRYPTO=OPENSSL
 #CRYPTO=GNUTLS
 DEF_POLARSSL=-DUSE_POLARSSL
@@ -30,7 +30,7 @@ LIBS_posix=
 LIBS_darwin=
 LIBS_mingw=-lws2_32 -lwinmm -lgdi32
 LIB_GNUTLS=-lgnutls -lhogweed -lnettle -lgmp $(LIBZ)
-LIB_OPENSSL=-lssl -lcrypto $(LIBZ)
+LIB_OPENSSL=-lssl -lcrypto $(LIBZ) -L"/E/Dependence_LIB/openssl101e_mingw_lib/lib" -L"/E/Dependence_LIB/zlib128_mingw/lib"
 LIB_POLARSSL=-lpolarssl $(LIBZ)
 PRIVATE_LIBS=$(LIBS_$(SYS))
 CRYPTO_LIB=$(LIB_$(CRYPTO)) $(PRIVATE_LIBS)
@@ -64,7 +64,7 @@ INSTALL_IMPLIB_darwin=
 INSTALL_IMPLIB_mingw=cp librtmp.dll.a $(LIBDIR)
 INSTALL_IMPLIB=$(INSTALL_IMPLIB_$(SYS))
 
-SHARED=yes
+SHARED=no
 SODEF_yes=-fPIC
 SOLIB_yes=librtmp$(SO_EXT)
 SOINST_yes=install_so
@@ -74,7 +74,7 @@ SO_INST=$(SOINST_$(SHARED))
 
 DEF=-DRTMPDUMP_VERSION=\"$(VERSION)\" $(CRYPTO_DEF) $(XDEF)
 OPT=-O2
-CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) $(SO_DEF)
+CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) $(SO_DEF) -I "/E/Dependence_LIB/openssl101e_mingw_lib/include" -I "/E/Dependence_LIB/zlib128_mingw/include"
 LDFLAGS=$(XLDFLAGS)
 
 

@@ -1,19 +1,19 @@
-VERSION=v2.4
+VERSION=v2.4-2013.10.10
 
 prefix=/usr/local
 
 CC=$(CROSS_COMPILE)gcc
 LD=$(CROSS_COMPILE)ld
 
-SYS=posix
-#SYS=mingw
+#SYS=posix
+SYS=mingw
 
 CRYPTO=OPENSSL
 #CRYPTO=POLARSSL
 #CRYPTO=GNUTLS
 LIBZ=-lz
 LIB_GNUTLS=-lgnutls -lhogweed -lnettle -lgmp $(LIBZ)
-LIB_OPENSSL=-lssl -lcrypto $(LIBZ)
+LIB_OPENSSL=-lssl -lcrypto $(LIBZ) -L"/E/Dependence_LIB/openssl101e_mingw_lib/lib" -L"/E/Dependence_LIB/zlib128_mingw/lib"
 LIB_POLARSSL=-lpolarssl $(LIBZ)
 CRYPTO_LIB=$(LIB_$(CRYPTO))
 DEF_=-DNO_CRYPTO
@@ -21,7 +21,7 @@ CRYPTO_DEF=$(DEF_$(CRYPTO))
 
 DEF=-DRTMPDUMP_VERSION=\"$(VERSION)\" $(CRYPTO_DEF) $(XDEF)
 OPT=-O2
-CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT)
+CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) -I "/E/Dependence_LIB/openssl101e_mingw_lib/include" -I "/E/Dependence_LIB/zlib128_mingw/include"
 LDFLAGS=-Wall $(XLDFLAGS)
 
 bindir=$(prefix)/bin
