@@ -949,7 +949,7 @@ main ( int argc, char **argv )
 		index++;
 	}
 
-	RTMP_LogPrintf ( "RTMPDump 2.4-2013-10-10\n" );
+	RTMP_LogPrintf ( "rtmpdump-2013.10.10-vc6\n" );
 	RTMP_LogPrintf
 	( "(c) 2010 Andrej Stepanchuk, Howard Chu, The Flvstreamer Team; license: GPL\n" );
 

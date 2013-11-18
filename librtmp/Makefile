@@ -1,4 +1,4 @@
-VERSION=v2.4-2013.10.10
+VERSION=v2.4-2013.10.10-mingw
 
 prefix=/usr/local
 
