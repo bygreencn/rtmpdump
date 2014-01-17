@@ -137,7 +137,7 @@ parsehost:
 	 * application = app[/appinstance]
 	 */
 
-		char *slash2, *slash3 = NULL;
+    char *slash2, *slash3 = NULL;
 	int applen, appnamelen;
 
 	slash2 = strchr(p, '/');
