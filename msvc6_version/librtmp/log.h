@@ -29,8 +29,7 @@
 #include "stdint.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 /* Enable this to get full debugging output */
 /* #define _DEBUG */
