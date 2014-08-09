@@ -30,7 +30,7 @@ LIBS_posix=
 LIBS_darwin=
 LIBS_mingw=-lws2_32 -lwinmm -lgdi32
 LIB_GNUTLS=-lgnutls -lhogweed -lnettle -lgmp $(LIBZ)
-LIB_OPENSSL=-lssl -lcrypto $(LIBZ) -L"/E/Dependence_LIB/openssl101e_mingw_lib/lib" -L"/E/Dependence_LIB/zlib128_mingw/lib"
+LIB_OPENSSL=-lssl -lcrypto $(LIBZ) -L"/usr/local/lib"
 LIB_POLARSSL=-lpolarssl $(LIBZ)
 PRIVATE_LIBS=$(LIBS_$(SYS))
 CRYPTO_LIB=$(LIB_$(CRYPTO)) $(PRIVATE_LIBS)
@@ -74,7 +74,7 @@ SO_INST=$(SOINST_$(SHARED))
 
 DEF=-DRTMPDUMP_VERSION=\"$(VERSION)\" $(CRYPTO_DEF) $(XDEF)
 OPT=-O2
-CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) $(SO_DEF) -I "/E/Dependence_LIB/openssl101e_mingw_lib/include" -I "/E/Dependence_LIB/zlib128_mingw/include"
+CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) $(SO_DEF) -I "/usr/local/include"
 LDFLAGS=$(XLDFLAGS)
 
 

@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 #ifndef __FUNCTION__
-#define __FUNCTION__ "rtmpdump-2013.10.10-vc6"
+#define __FUNCTION__ "rtmpdump-2014.8.10-vc6"
 #endif
 
 #pragma comment(lib,"Ws2_32.lib")
