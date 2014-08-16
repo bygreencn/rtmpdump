@@ -1,3 +1,8 @@
 *.ncb
 *.opt
+*.pch
+*.obj
+*.ilk
+*.pdb
+*.idb
 *.positions
