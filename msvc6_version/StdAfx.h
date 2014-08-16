@@ -19,9 +19,9 @@
 #endif
 
 #pragma comment(lib,"Ws2_32.lib")
-#pragma comment(lib,"lib/libeay32.lib")
-#pragma comment(lib,"lib/ssleay32.lib")
-#pragma comment(lib,"lib/zlib.lib")
+#pragma comment(lib,"../lib/libeay32.lib")
+#pragma comment(lib,"../lib/ssleay32.lib")
+#pragma comment(lib,"../lib/zlib.lib")
 
 
 //{{AFX_INSERT_LOCATION}}

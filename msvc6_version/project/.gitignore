@@ -1,0 +1,4 @@
+*.plg
+*.positions
+/netstackdump_read
+/netstackdump
