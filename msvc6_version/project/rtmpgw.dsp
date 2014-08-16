@@ -1,24 +1,24 @@
-# Microsoft Developer Studio Project File - Name="rtmp_vc6" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="rtmpgw" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=rtmp_vc6 - Win32 Debug
+CFG=rtmpgw - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "rtmp_vc6.mak".
+!MESSAGE NMAKE /f "rtmpgw.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "rtmp_vc6.mak" CFG="rtmp_vc6 - Win32 Debug"
+!MESSAGE NMAKE /f "rtmpgw.mak" CFG="rtmpgw - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "rtmp_vc6 - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "rtmp_vc6 - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "rtmpgw - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "rtmpgw - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -28,7 +28,7 @@ CFG=rtmp_vc6 - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "rtmp_vc6 - Win32 Release"
+!IF  "$(CFG)" == "rtmpgw - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -41,9 +41,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "STATIC_GETOPT" /FR /FD /c
-# SUBTRACT CPP /YX /Yc /Yu
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "STATIC_GETOPT" /YX /FD /c
 # ADD BASE RSC /l 0x804 /d "NDEBUG"
 # ADD RSC /l 0x804 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,10 +50,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"MSVCRT.lib" /out:"bin/rtmpdump2.exe"
-# SUBTRACT LINK32 /verbose
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"msvcrt.lib" /force /libpath:"../lib"
 
-!ELSEIF  "$(CFG)" == "rtmp_vc6 - Win32 Debug"
+!ELSEIF  "$(CFG)" == "rtmpgw - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -67,9 +65,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "STATIC_GETOPT" /FR /FD /GZ /c
-# SUBTRACT CPP /YX /Yc /Yu
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../include" /I "../librtmp" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "STATIC_GETOPT" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
 # ADD RSC /l 0x804 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -77,44 +74,32 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"MSVCRT.lib" /out:"bin/rtmpdump2.exe" /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"msvcrt.lib" /force /pdbtype:sept /libpath:"../lib"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "rtmp_vc6 - Win32 Release"
-# Name "rtmp_vc6 - Win32 Debug"
+# Name "rtmpgw - Win32 Release"
+# Name "rtmpgw - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\librtmp\amf.c
+SOURCE=..\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\getopt.c
+SOURCE=..\rtmpgw.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\librtmp\hashswf.c
+SOURCE=..\StdAfx.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\librtmp\log.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\parseurl.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\rtmp.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\rtmpdump.c
+SOURCE=..\thread.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -122,56 +107,20 @@ SOURCE=.\rtmpdump.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\librtmp\amf.h
+SOURCE=..\getopt.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\librtmp\bytes.h
+SOURCE=..\StdAfx.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\librtmp\dh.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\dhgroups.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\getopt.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\handshake.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\http.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\log.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\rtmp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\librtmp\rtmp_sys.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.h
+SOURCE=..\thread.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
-# Begin Source File
-
-SOURCE=.\ReadMe.txt
-# End Source File
 # End Target
 # End Project
